@@ -19,3 +19,17 @@ To test if the classes are opened in the `staging` flavour, run the application 
 To check the app with the closed variant, just run the `productionDebug` build variant. You'll see the message `Closed MyLibClass`.
 
 ![productionFlavour](./art/production_with_closed_class.png)
+
+# Known issues
+
+In terms of execution, everything works as expected. Each flavour uses the correct java module variant.
+
+The problem is that the IDE uses the `main` java module sourceset when the `production` flavour is selected. In this case, everything works well in the IDE.
+
+But when using the `staging` flavour, we are using the `secondConfiguration` generated `.jar` (`lib/build/libs/lib-secondConfiguration.jar`).
+
+That has 2 downsides:
+
+- The classes from the jar are not resolved until the jar is generated. The task `lib:secondConfigurationJar` needs to be executed.
+- When you navigate to the java source code when using the `staging` flavour, the classes are opened from the jar, and not from the source code. Thus making the navigation very difficult as you cannot use `Go To Declaration (CMD + B)` to navigate to the source code.
+![jarDecompiled](./art/jar_decompiled.png)
