@@ -1,0 +1,61 @@
+plugins {
+    id 'java-library'
+    id 'org.jetbrains.kotlin.jvm'
+    id 'kotlin'
+    id 'kotlin-allopen'
+}
+
+group = 'com.example.lib'
+
+compileTestKotlin {
+    kotlinOptions {
+        jvmTarget = "11"
+    }
+}
+
+compileKotlin {
+    kotlinOptions {
+        jvmTarget = "11"
+    }
+}
+
+kotlin {
+    jvmToolchain {
+        languageVersion.set(JavaLanguageVersion.of(11))
+    }
+}
+
+def allOpenAttribute = Attribute.of("allOpenVariant", String.class)
+configurations {
+    allOpenPublished {
+        attributes { AttributeContainer attributeContainer ->
+            attributeContainer.attribute(allOpenAttribute, "true")
+        }
+    }
+}
+
+sourceSets {
+    secondConfiguration {
+        java {
+            srcDir 'src/main/java'
+            compileClasspath += sourceSets.main.compileClasspath
+            runtimeClasspath += sourceSets.main.runtimeClasspath
+        }
+    }
+}
+
+task secondConfigurationJar(type: Jar) {
+    from sourceSets.secondConfiguration.output
+    archiveClassifier.set(sourceSets.secondConfiguration.name)
+}
+
+configurations.getByName("allOpenPublished").outgoing.artifact(secondConfigurationJar)
+
+dependencies {
+    api(project(':allopen-annotation:none-open'))
+    secondConfigurationApi(project(':allopen-annotation:all-open'))
+}
+
+allOpen {
+    annotation('com.example.allopen.Open')
+}
